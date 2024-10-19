@@ -11,7 +11,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('/api/user', { email, password });
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/user`, { email, password });
       setMessage(res.data.message);
       setError('');
     } catch (err) {

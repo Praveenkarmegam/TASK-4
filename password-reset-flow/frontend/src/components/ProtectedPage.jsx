@@ -12,7 +12,7 @@ const ProtectedPage = () => {
     if (!token) {
       navigate('/login');
     } else {
-      axios.get('/api/data', {
+      axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/data`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(response => {

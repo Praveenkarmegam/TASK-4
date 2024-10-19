@@ -388,10 +388,3 @@ const UpdatePassword = () => {
 };
 
 export default UpdatePassword;
-
-
-render .com link 
-
-https://task-4-042t.onrender.com
-
-how to  fix this  issue?
