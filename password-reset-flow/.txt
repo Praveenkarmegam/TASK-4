@@ -1,0 +1,570 @@
+source code : 
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import Navbar from './components/Navbar';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import ResetPassword from './components/ResetPassword';
+import UpdatePassword from './components/UpdatePassword';
+import ProtectedPage from './components/ProtectedPage';
+
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check authentication on initial render
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsAuthenticated(false); // Update state after logout
+  };
+
+  return (
+    <Router>
+      <Navbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+      <Routes>
+        {/* If authenticated, redirect to /protected; otherwise, go to login */}
+        <Route path="/" element={isAuthenticated ? <Navigate to="/protected" /> : <Navigate to="/login" />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/protected" /> : <Login setIsAuthenticated={setIsAuthenticated} />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/update-password/:token" element={<UpdatePassword />} />
+        {/* Protected route */}
+        <Route path="/protected" element={isAuthenticated ? <ProtectedPage /> : <Navigate to="/login" />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+
+index.css : 
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
+  }
+  
+  *, *::before, *::after {
+    box-sizing: inherit;
+  }
+  
+  a {
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
+  }
+  
+  a:hover {
+    color: #535bf2;
+  }
+  
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 0;
+    background-color: var(--background-color);
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  
+  button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    cursor: pointer;
+    transition: border-color 0.25s;
+  }
+  
+  button:hover {
+    border-color: #646cff;
+  }
+  
+  button:focus,
+  button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+  }
+  
+  @media (prefers-color-scheme: light) {
+    :root {
+      color: #213547;
+      background-color: #ffffff;
+    }
+  
+    a:hover {
+      color: #747bff;
+    }
+  
+    button {
+      background-color: #f9f9f9;
+    }
+  }
+  
+  /* Responsive styling */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+  
+    .container {
+      padding: 10px;
+    }
+  
+    button {
+      font-size: 0.9em;
+      padding: 0.5em 1em;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 1.8rem;
+    }
+  
+    .container {
+      padding: 5px;
+    }
+  
+    button {
+      font-size: 0.8em;
+      padding: 0.4em 0.8em;
+    }
+  }
+  
+  vite.config.js : 
+
+  import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true, // ensures the host header of the request matches the backend
+        secure: false, // only necessary if your backend is using HTTPS with self-signed certificates
+      },
+    },
+  },
+});
+
+
+login.jsx : 
+
+import React, { useState } from 'react';
+import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { TextField, Button, Container, Typography, Box, Alert, Grid } from '@mui/material';
+
+const Login = ({ setIsAuthenticated }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(''); // Clear errors before submission
+    try {
+      const res = await axios.post('/api/authentication', { email, password });
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('email', email); // Store email
+
+      // Reset form fields after successful login
+      setEmail('');
+      setPassword('');
+      setError('');
+
+      // Update authentication status in App component
+      setIsAuthenticated(true);
+
+      // Navigate to the protected route
+      navigate('/protected');
+    } catch (err) {
+      console.error(err.response);
+
+      // Reset password on error, keep email for convenience
+      setPassword('');
+      setError(err.response?.data?.message || 'Invalid login credentials');
+    }
+  };
+
+  return (
+    <Container maxWidth="sm" sx={{ mt: 4 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography variant="h4" gutterBottom>
+          Login
+        </Typography>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                label="Email"
+                variant="outlined"
+                fullWidth
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Password"
+                type="password"
+                variant="outlined"
+                fullWidth
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </Grid>
+          </Grid>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            Login
+          </Button>
+          <Typography sx={{ mt: 2 }}>
+            Don't have an account? <Link to="/signup">Sign up here</Link>
+          </Typography>
+        </Box>
+      </Box>
+    </Container>
+  );
+};
+
+export default Login;
+
+
+navbar.jsx : 
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+
+const Navbar = ({ isAuthenticated, onLogout }) => {
+  return (
+    <AppBar position="static">
+      <Toolbar>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          Authentication System
+        </Typography>
+
+        {/* Conditional rendering based on authentication status */}
+        {!isAuthenticated ? (
+          <>
+            <Button color="inherit" component={Link} to="/login">
+              Login
+            </Button>
+            <Button color="inherit" component={Link} to="/signup">
+              Signup
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button color="inherit" component={Link} to="/reset-password">
+              Reset Password
+            </Button>
+            <Button color="inherit" component={Link} to="/update-password/:token">
+              Update Password
+            </Button>
+            <Button color="inherit" onClick={onLogout}>
+              Logout
+            </Button>
+          </>
+        )}
+      </Toolbar>
+    </AppBar>
+  );
+};
+
+export default Navbar;
+
+
+
+/* Navbar.css */
+.navbar {
+    background-color: #333;
+    padding: 1rem;
+  }
+  
+  .navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .navbar-brand {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.5rem;
+  }
+  
+  .navbar-links ul {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .navbar-links ul li {
+    display: inline;
+  }
+  
+  .navbar-links ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1rem;
+  }
+  
+  .navbar-links ul li a:hover {
+    color: #ff9c00; /* Add a hover effect */
+  }
+  
+  .logout-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+  
+  .logout-btn:hover {
+    color: #ff9c00; /* Hover effect for logout button */
+  }
+  
+
+ProtectedPage.jsx : 
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+const ProtectedPage = () => {
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+  
+    if (!token) {
+      navigate('/login');
+    } else {
+      axios.get('/api/data', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then(response => {
+        setMessage(response.data.message);
+      })
+      .catch(err => {
+        localStorage.removeItem('token');
+        navigate('/login');
+      });
+    }
+  }, [navigate]);
+  
+  return (
+    <div className="container">
+      <h2>Protected Page</h2>
+      {message ? <p>{message}</p> : <p>Loading...</p>}
+    </div>
+  );
+};
+
+export default ProtectedPage;
+
+ResetPassword.jsx : 
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const ResetPassword = () => {
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post('/api/reset-password', { email });
+      setMessage(res.data.message);
+    } catch (err) {
+      setMessage('Error sending reset email');
+    }
+  };
+
+  return (
+    <div className="container">
+      <h2>Reset Password</h2>
+      {message && <p>{message}</p>}
+      <form onSubmit={handleSubmit}>
+        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required />
+        <button type="submit" className="btn btn-primary">Send Reset Email</button>
+      </form>
+    </div>
+  );
+};
+
+export default ResetPassword;
+
+signup.jsx : 
+import React, { useState } from 'react';
+import axios from 'axios';
+import { TextField, Button, Container, Typography, Box, Alert } from '@mui/material';
+
+const Signup = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post('/api/user', { email, password });
+      setMessage(res.data.message);
+      setError('');
+    } catch (err) {
+      setError('Error during signup');
+      setMessage('');
+    }
+  };
+
+  return (
+    <Container maxWidth="sm">
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Signup
+        </Typography>
+        {message && <Alert severity="success">{message}</Alert>}
+        {error && <Alert severity="error">{error}</Alert>}
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <TextField
+            label="Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <Button type="submit" variant="contained" color="primary" fullWidth>
+            Signup
+          </Button>
+        </form>
+      </Box>
+    </Container>
+  );
+};
+
+export default Signup;
+
+UpdatePassword.jsx : 
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+
+const UpdatePassword = () => {
+  const { token } = useParams(); // Extract the token from URL
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    try {
+      // Send POST request to backend to update the password
+      const res = await axios.post(`/api/reset-password/${token}`, { password });
+      setMessage(res.data.message); // Show success message
+      setError('');
+    } catch (err) {
+      setError('Error resetting password. Please try again.'); // Show error message
+      setMessage('');
+    }
+  };
+
+  return (
+    <div className="container">
+      <h2>Update Password</h2>
+      {message && <p style={{ color: 'green' }}>{message}</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <input 
+            type="password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            placeholder="New Password" 
+            required 
+            className="form-control"
+          />
+        </div>
+        <div className="form-group">
+          <input 
+            type="password" 
+            value={confirmPassword} 
+            onChange={(e) => setConfirmPassword(e.target.value)} 
+            placeholder="Confirm New Password" 
+            required 
+            className="form-control"
+          />
+        </div>
+        <button type="submit" className="btn btn-primary">Update Password</button>
+      </form>
+    </div>
+  );
+};
+
+export default UpdatePassword;
+

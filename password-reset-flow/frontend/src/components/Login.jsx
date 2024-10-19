@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box, Alert, Grid } from '@mui/material';
 
-const Login = () => {
+const Login = ({ setIsAuthenticated }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,11 +15,15 @@ const Login = () => {
     try {
       const res = await axios.post('/api/authentication', { email, password });
       localStorage.setItem('token', res.data.token);
+      localStorage.setItem('email', email); // Store email
 
       // Reset form fields after successful login
       setEmail('');
       setPassword('');
       setError('');
+
+      // Update authentication status in App component
+      setIsAuthenticated(true);
 
       // Navigate to the protected route
       navigate('/protected');
