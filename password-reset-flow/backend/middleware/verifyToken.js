@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../model/index");
+const User = require("../model/User");
 
 const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -10,21 +10,19 @@ const verifyToken = async (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, process.env.SECRET_KEY, async (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: "Invalid Token" });
-    }
-
-    const user = await User.findOne({ _id: decoded.id });
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findById(decoded.id);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Attach user to the request and proceed to the next middleware
     req.user = user;
     next();
-  });
+  } catch (err) {
+    return res.status(403).json({ message: "Invalid Token" });
+  }
 };
 
 module.exports = verifyToken;
