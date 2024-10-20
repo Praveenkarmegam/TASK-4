@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: process.env.REACT_APP_API_URL || 'http://localhost:3000', // Use env variable
+        target: 'http://localhost:5000',
         changeOrigin: true, // ensures the host header of the request matches the backend
         secure: false, // only necessary if your backend is using HTTPS with self-signed certificates
       },

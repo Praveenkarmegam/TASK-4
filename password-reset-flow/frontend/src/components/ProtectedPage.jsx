@@ -8,11 +8,11 @@ const ProtectedPage = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-  
+    
     if (!token) {
       navigate('/login');
     } else {
-      axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/data`, {
+      axios.get(`/api/data`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(response => {

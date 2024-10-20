@@ -19,7 +19,7 @@ const UpdatePassword = () => {
 
     try {
       // Send POST request to backend to update the password
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/reset-password/${token}`, { password });
+      const res = await axios.post(`/api/reset-password/${token}`, { password });
       setMessage(res.data.message); // Show success message
       setError('');
     } catch (err) {

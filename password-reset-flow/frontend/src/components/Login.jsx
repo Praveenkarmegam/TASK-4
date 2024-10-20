@@ -13,7 +13,8 @@ const Login = ({ setIsAuthenticated }) => {
     e.preventDefault();
     setError(''); // Clear errors before submission
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/authentication`, { email, password });
+      // Update API URL to match the backend route for login
+      const res = await axios.post(`/api/login`, { email, password });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('email', email); // Store email
 

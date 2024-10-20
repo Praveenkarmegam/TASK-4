@@ -8,7 +8,7 @@ const ResetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/reset-password`, { email });
+      const res = await axios.post(`/api/reset-password`, { email });
       setMessage(res.data.message);
     } catch (err) {
       setMessage('Error sending reset email');

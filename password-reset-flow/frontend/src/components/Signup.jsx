@@ -11,7 +11,8 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/user`, { email, password });
+      // Update API URL to match the backend route for signup
+      const res = await axios.post(`/api/register`, { email, password });
       setMessage(res.data.message);
       setError('');
     } catch (err) {
