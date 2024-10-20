@@ -12,7 +12,7 @@ const ProtectedPage = () => {
     if (!token) {
       navigate('/login');
     } else {
-      axios.get(`https://task-4-w3ml.onrender.com/api/data`, {
+      axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/data`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(response => {

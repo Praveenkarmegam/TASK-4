@@ -13,8 +13,7 @@ const Login = ({ setIsAuthenticated }) => {
     e.preventDefault();
     setError(''); // Clear errors before submission
     try {
-      //const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/authentication`, { email, password });
-      const res = await axios.post(`https://task-4-w3ml.onrender.com/api/authentication`, { email, password });
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/authentication`, { email, password });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('email', email); // Store email
 
