@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const instance = axios.create({ baseURL: 'http://localhost:5000/api/auth' });
+const instance = axios.create({ baseURL: 'https://task-4-8wd4.onrender.com/api/auth' });
 
 instance.interceptors.request.use(
   (config) => {
