@@ -1,5 +1,5 @@
 {
-  "name": "password-reset-flow",
+  "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -10,13 +10,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.1",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.7.1",
-    "nodemailer": "^6.9.15",
-    "nodemon": "^3.1.7"
+    "mongoose": "^8.13.2",
+    "nodemailer": "^6.10.1",
+    "uuid": "^11.1.0"
   }
 }

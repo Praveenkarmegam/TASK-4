@@ -1,41 +1,41 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
 
-const Navbar = ({ isAuthenticated, onLogout }) => {
+function Navbar({ setIsAuthenticated }) {
+  const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem('token');
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+    navigate('/login');
+  };
+
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Authentication System
-        </Typography>
-
-        {/* Conditional rendering based on authentication status */}
-        {!isAuthenticated ? (
-          <>
-            <Button color="inherit" component={Link} to="/login">
-              Login
-            </Button>
-            <Button color="inherit" component={Link} to="/signup">
-              Signup
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button color="inherit" component={Link} to="/reset-password">
-              Reset Password
-            </Button>
-            <Button color="inherit" component={Link} to="/update-password/:token">
-              Update Password
-            </Button>
-            <Button color="inherit" onClick={onLogout}>
-              Logout
-            </Button>
-          </>
-        )}
-      </Toolbar>
-    </AppBar>
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div className="container">
+        <Link className="navbar-brand" to="/">Password-rest</Link>
+        <div className="collapse navbar-collapse">
+          <ul className="navbar-nav ms-auto">
+            {!isLoggedIn ? (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/login">Login</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/register">Register</Link>
+                </li>
+              </>
+            ) : (
+              <li className="nav-item">
+                <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
+    </nav>
   );
-};
+}
 
 export default Navbar;
